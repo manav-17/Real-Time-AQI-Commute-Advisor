@@ -1,4 +1,4 @@
-AQI Commute Advisor 🚇🚗☀️☁️🏭
+AQI Commute Advisor: 
 
 Project Goal
 
