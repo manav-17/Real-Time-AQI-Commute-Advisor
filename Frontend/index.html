@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AQI Commute Recommender 🚇🚗</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            /* Background Image Styles */
+            background-image: url('data:image/jpeg;base64,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');
+            background-size: cover; /* Scale image to cover the entire background */
+            background-position: center center; /* Center the image */
+            background-repeat: no-repeat; /* Do not repeat the image */
+            background-attachment: fixed; /* Keep background fixed during scroll */
+            /* --- End New Styles --- */
+        }
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(255, 255, 255, 0.6); /* Light overlay */
+            z-index: -1; /* Place it behind the content */
+        }
+        .risk-minimal { background-color: #f0fdf4; color: #166534; border-color: #4ade80; } /* green */
+        .risk-caution { background-color: #fefce8; color: #854d0e; border-color: #facc15; } /* yellow */
+        .risk-high-alert { background-color: #fff7ed; color: #9a3412; border-color: #fb923c; } /* orange */
+        .risk-severe { background-color: #fef2f2; color: #991b1b; border-color: #f87171; } /* red */
+        .risk-unknown { background-color: #f3f4f6; color: #4b5563; border-color: #9ca3af; } /* gray */
+
+        .table-container { max-height: 500px; }
+
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1); width: 36px; height: 36px;
+            border-radius: 50%; border-left-color: #4f46e5;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        header, .bg-white {
+           background-color: rgba(255, 255, 255, 0.85);
+           backdrop-filter: blur(4px);
+        }
+
+    </style>
+</head>
+<body class="min-h-screen">
+    <div id="app" class="max-w-5xl mx-auto p-4 sm:p-6 lg:p-8">
+        <header class="text-center py-8 rounded-xl shadow-lg mb-8 ring-1 ring-gray-200">
+             <h1 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600">
+                AQI Commute Advisor
+            </h1>
+            <p class="mt-2 text-xl text-gray-600">24-Hour Pollution Forecast & Mode Recommendation 🚇🚶‍♀️</p>
+        </header>
+        <div class="bg-white p-6 rounded-xl shadow-md flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0 md:space-x-4 mb-8 ring-1 ring-gray-200">
+             <div class="flex-grow w-full md:w-auto">
+                <label for="city-select" class="block text-sm font-medium text-gray-700 mb-1">Select Metro City:</label>
+                <select id="city-select" class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-lg">
+                    <option value="mumbai" selected>Mumbai</option>
+                    <option value="delhi">Delhi</option>
+                    <option value="chennai">Chennai</option>
+                    <option value="bangalore">Bangalore</option>
+                </select>
+            </div>
+            <button id="fetch-button" class="w-full md:w-auto px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-lg shadow-md hover:from-indigo-700 hover:to-purple-700 transition duration-200 transform hover:scale-105 text-lg">
+                Get Forecast
+            </button>
+        </div>
+        <div id="loading" class="hidden text-center p-8 text-indigo-700 font-semibold flex flex-col items-center">
+             <div class="spinner mb-4"></div>
+            Predicting 24-hour AQI and generating recommendations...
+        </div>
+        <div id="error-message" class="hidden bg-red-100 border-l-4 border-red-600 text-red-800 p-6 rounded-lg shadow-md mb-8 ring-1 ring-red-200" role="alert">
+             <p class="font-bold text-lg">Oops! Something went wrong:</p>
+            <p id="error-text" class="mt-1"></p>
+        </div>
+        <div id="results" class="hidden space-y-8">
+              <h2 class="text-3xl font-bold text-gray-800 mb-4 border-b-2 border-indigo-200 pb-3">
+                Forecast for <span id="city-title" class="text-indigo-600"></span>
+            </h2>
+            <div id="commute-panel" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+            <h3 class="text-2xl font-semibold text-gray-700 mb-4 mt-6">Hourly Breakdown (Next 24 Hours)</h3>
+             <div class="table-container overflow-y-auto bg-white rounded-xl shadow-md ring-1 ring-gray-200">
+                 <table class="min-w-full divide-y divide-gray-200">
+                     <thead class="bg-gray-100 sticky top-0 backdrop-blur-sm">
+                          <tr>
+                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Time</th>
+                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">PM2.5</th>
+                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Category</th>
+                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Health Alert</th>
+                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Weather</th>
+                        </tr>
+                     </thead>
+                     <tbody id="hourly-table-body" class="bg-white divide-y divide-gray-200"></tbody>
+                 </table>
+             </div>
+        </div>
+    </div>
+    <script>
+        const API_BASE_URL = '/api/predict_aqi/';
+        const fetchButton = document.getElementById('fetch-button');
+        const citySelect = document.getElementById('city-select');
+        const loadingDiv = document.getElementById('loading');
+        const resultsDiv = document.getElementById('results');
+        const errorDiv = document.getElementById('error-message');
+        const errorText = document.getElementById('error-text');
+        const commutePanel = document.getElementById('commute-panel');
+        const hourlyTableBody = document.getElementById('hourly-table-body');
+        const cityTitle = document.getElementById('city-title');
+
+        fetchButton.addEventListener('click', fetchForecast);
+
+        function getRiskClass(risk) { /* ... */
+             switch (risk) {
+                case 'Minimal': return 'risk-minimal border-l-4 border-green-500';
+                case 'Caution': return 'risk-caution border-l-4 border-yellow-500';
+                case 'High Alert': return 'risk-high-alert border-l-4 border-orange-500';
+                case 'Severe': return 'risk-severe border-l-4 border-red-500';
+                default: return 'risk-unknown border-l-4 border-gray-500';
+            }
+        }
+
+        async function fetchForecast() { /* ... */
+             const city = citySelect.value;
+            resultsDiv.classList.add('hidden');
+            errorDiv.classList.add('hidden');
+            loadingDiv.classList.remove('hidden');
+             try {
+                const maxRetries = 3; let response = null;
+                for (let i = 0; i < maxRetries; i++) {
+                     try {
+                        const url = `${API_BASE_URL}${city}`; console.log(`Fetching: ${url}`);
+                        response = await fetch(url);
+                        if (response.ok) break;
+                        if (i < maxRetries - 1) { await new Promise(r => setTimeout(r, Math.pow(2, i) * 1000)); console.warn(`API call failed (status ${response.status}). Retrying...`); }
+                    } catch (networkError) {
+                        if (i === maxRetries - 1) throw networkError;
+                        await new Promise(r => setTimeout(r, Math.pow(2, i) * 1000)); console.warn(`Network error. Retrying...`);
+                    }
+                }
+                 if (!response || !response.ok) {
+                    let errorMsg = `HTTP Error: ${response ? response.status : 'Network Error'}`;
+                    try { const errorJson = await response.json(); errorMsg = errorJson.error || errorMsg; } catch (e) {}
+                    throw new Error(errorMsg);
+                }
+                 const data = await response.json(); console.log("API Response:", data);
+                displayResults(data);
+             } catch (error) {
+                console.error("Fetch error:", error); errorText.textContent = error.message || 'Connection error.';
+                errorDiv.classList.remove('hidden');
+            } finally {
+                loadingDiv.classList.add('hidden');
+            }
+        }
+
+        function displayResults(data) { /* ... */
+             if (!data || !data.city) { console.error("Invalid data:", data); errorText.textContent = 'Invalid data from server.'; errorDiv.classList.remove('hidden'); return; }
+             cityTitle.textContent = data.city;
+             commutePanel.innerHTML = '';
+            if (data.commute_recommendations && data.commute_recommendations.length > 0) {
+                data.commute_recommendations.forEach(rec => {
+                    const riskClass = getRiskClass(rec.risk);
+                    const html = `<div class="bg-white p-5 rounded-xl shadow-md ${riskClass} transition duration-300 ease-in-out hover:shadow-lg"> <h3 class="text-xl font-bold mb-2">${rec.commute_time}</h3> <p class="text-lg font-semibold mt-1">Predicted: <span class="font-bold">${rec.category}</span></p> <p class="text-sm font-medium text-gray-600">Avg. PM2.5: ${rec.avg_pm25_context} μg/m³</p> <hr class="my-3 border-gray-300"/> <p class="text-sm"><span class="font-bold text-gray-700">Health Risk:</span> <span class="font-semibold">${rec.risk}</span></p> <p class="text-base mt-2"><span class="font-bold text-gray-700">Advice:</span> ${rec.recommendation}</p> </div>`;
+                    commutePanel.innerHTML += html;
+                });
+            } else { commutePanel.innerHTML = '<p>No commute recommendations.</p>'; }
+             hourlyTableBody.innerHTML = '';
+            if (data.hourly_forecast && data.hourly_forecast.length > 0) {
+                data.hourly_forecast.forEach(hour => {
+                    const row = document.createElement('tr'); row.className = 'hover:bg-indigo-50 transition duration-150';
+                     let categoryClass = 'text-gray-700'; /* ... */ if (hour.category.includes('Clear Skies')) categoryClass = 'text-green-700 font-medium'; else if (hour.category.includes('Haze')) categoryClass = 'text-yellow-700 font-medium'; else if (hour.category.includes('Fog')) categoryClass = 'text-orange-700 font-medium'; else if (hour.category.includes('Smog')) categoryClass = 'text-red-700 font-medium'; else if (hour.category.includes('Soup')) categoryClass = 'text-red-800 font-bold'; else if (hour.category.includes('Red')) categoryClass = 'text-red-900 font-extrabold';
+                     let alertClasses = 'text-xs px-2 py-0.5 rounded-full '; switch (hour.alert_level) { case 'Minimal': alertClasses += 'bg-green-100 text-green-800'; break; case 'Caution': alertClasses += 'bg-yellow-100 text-yellow-800'; break; case 'High Alert': alertClasses += 'bg-orange-100 text-orange-800'; break; case 'Severe': alertClasses += 'bg-red-100 text-red-800'; break; default: alertClasses += 'bg-gray-100 text-gray-800'; }
+                     const weatherStr = `${hour.weather.temp_c}°C, ${hour.weather.humidity_pct}%, ${hour.weather.precip_mm}mm, ${hour.weather.wind_kmh}km/h`.replace(/\s+/g, ' ').trim();
+                     // --- Ensure this uses pm25 ---
+                    const html = `<td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800">${hour.time.split(' ')[1]}</td> <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${hour.pm25_context}</td> <td class="px-6 py-4 whitespace-nowrap text-sm ${categoryClass}">${hour.category}</td> <td class="px-6 py-4 whitespace-nowrap text-sm"><span class="${alertClasses}">${hour.alert_level}</span></td> <td class="px-6 py-4 whitespace-nowrap text-xs text-gray-500">${weatherStr}</td>`;
+                    row.innerHTML = html; hourlyTableBody.appendChild(row);
+                });
+            } else { hourlyTableBody.innerHTML = '<tr><td colspan="5">No hourly data.</td></tr>'; }
+             resultsDiv.classList.remove('hidden');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => { console.log("DOM Loaded."); fetchForecast(); });
+    </script>
+</body>
+</html>
