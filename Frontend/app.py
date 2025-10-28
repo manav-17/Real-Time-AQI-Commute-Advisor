@@ -9,10 +9,16 @@ import logging
 from collections import deque
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-CLASSIFIER_MODEL_FILE = 'classification_model.joblib' # Primary model for output category
-MAPPING_FILE = 'quirky_category_mapping.joblib'      # Mapping for classifier output
-REGRESSOR_MODEL_FILE = 'regression_model.joblib'      # Used ONLY for lag updates
-HISTORICAL_DATA_FILE = 'final_dataset.csv'          # Your historical data
+import os
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+CLASSIFIER_MODEL_FILE = os.path.join(BASE_DIR, 'classification_model.joblib')
+MAPPING_FILE = os.path.join(BASE_DIR, 'quirky_category_mapping.joblib')
+REGRESSOR_MODEL_FILE = os.path.join(BASE_DIR, 'regression_model.joblib')
+HISTORICAL_DATA_FILE = os.path.join(BASE_DIR, 'final_dataset.csv')
+
+         
 
 FORECAST_API_URL = "https://api.open-meteo.com/v1/forecast"
 TIMEZONE = "Asia/Kolkata"
@@ -370,13 +376,17 @@ def predict_aqi_route(city_name):
     })
 
 
+from flask import send_from_directory
+
 @app.route('/')
 def index():
-    frontend_file = 'index.html'
-    if os.path.exists(frontend_file):
-        with open(frontend_file, 'r') as f: return f.read()
-    else: return "Frontend file not found.", 404
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    return send_from_directory(base_dir, 'index.html')
+
+
+
 
 if __name__ == '__main__':
     predictor = AQIPredictor()
     app.run(debug=True)
+    infer_model_details()
