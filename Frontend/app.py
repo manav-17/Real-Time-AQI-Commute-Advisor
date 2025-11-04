@@ -1,3 +1,4 @@
+#Importing the librabries
 import pandas as pd
 import numpy as np
 import requests
@@ -5,25 +6,28 @@ import joblib
 import os
 from flask import Flask, jsonify, request
 from datetime import datetime, timedelta
-import logging
-from collections import deque
+import logging #for printing status messages and errors.
+from collections import deque #list thats fast for adding or removing items from the ends.
 
+#Configures the logging system to print messages with timestamps.
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 import os
 
+#Gets the absolute path to the directory.
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
+#Creates the full file paths for your models, mapping, and data.
 CLASSIFIER_MODEL_FILE = os.path.join(BASE_DIR, 'classification_model.joblib')
 MAPPING_FILE = os.path.join(BASE_DIR, 'quirky_category_mapping.joblib')
 REGRESSOR_MODEL_FILE = os.path.join(BASE_DIR, 'regression_model.joblib')
 HISTORICAL_DATA_FILE = os.path.join(BASE_DIR, 'final_dataset.csv')
 
          
-
+#Defines the api url for getting future weather data.
 FORECAST_API_URL = "https://api.open-meteo.com/v1/forecast"
 TIMEZONE = "Asia/Kolkata"
 
-
+#Defines the coordinates for each city required by the weather api.
 CITIES_COORDS = {
     "mumbai": {"lat": 19.0760, "lon": 72.8777},
     "delhi": {"lat": 28.6139, "lon": 77.2090},
@@ -39,10 +43,10 @@ MAX_LAG = 0
 def infer_model_details():
     global FEATURE_NAMES_CLF, FEATURE_NAMES_REG, LAGS_TO_CREATE, MAX_LAG
     try:
-        if not os.path.exists(CLASSIFIER_MODEL_FILE) or not os.path.exists(REGRESSOR_MODEL_FILE):
+        if not os.path.exists(CLASSIFIER_MODEL_FILE) or not os.path.exists(REGRESSOR_MODEL_FILE): #Check if the model files actually exist.
              raise FileNotFoundError("Model file(s) not found.")
 
-        temp_clf = joblib.load(CLASSIFIER_MODEL_FILE)
+        temp_clf = joblib.load(CLASSIFIER_MODEL_FILE) #Load the models temporarily just to inspect them.
         FEATURE_NAMES_CLF = temp_clf.feature_names_in_.tolist()
         temp_reg = joblib.load(REGRESSOR_MODEL_FILE)
         FEATURE_NAMES_REG = temp_reg.feature_names_in_.tolist()
@@ -53,10 +57,10 @@ def infer_model_details():
         ])))
 
         if not LAGS_TO_CREATE:
-            logging.warning("No lag features detected in classifier model names. Assuming none.")
+            logging.warning("No lag features detected in classifier model names. Assuming none.") #This handles the case where your model doesn't use lag features.
             MAX_LAG = 0
         else:
-            MAX_LAG = max(LAGS_TO_CREATE)
+            MAX_LAG = max(LAGS_TO_CREATE) #Find the biggest lag.
 
         logging.info(f"Successfully inferred model details. Using Classifier features.")
         logging.info(f"Required Features: {len(FEATURE_NAMES_CLF)} features.")
@@ -79,7 +83,7 @@ def infer_model_details():
         LAGS_TO_CREATE = []
         MAX_LAG = 0
 
-
+#These functions convert your quirky category names into human readable advice.
 def get_health_alert(quirky_category_name):
     if quirky_category_name in ["Crystal Clear Skies ☀️", "Light Haze ☁️"]: return {"level": "Minimal", "advice": "All outdoor activity is fine."}
     elif quirky_category_name in ["Urban Fog 🏙️", "Smog Alert 🏭"]: return {"level": "Caution", "advice": "Sensitive groups limit prolonged outdoor exertion."}
@@ -94,7 +98,7 @@ def get_commute_advice(quirky_category_name):
     elif quirky_category_name == "Code Red Atmosphere 🚨": return "Severe exposure risk. Avoid non-essential outdoor travel."
     return "Check local advisories."
 
-class AQIPredictor:
+class AQIPredictor: #The Main Predictor Class
     def __init__(self):
         self.model_classifier = self._load_model(CLASSIFIER_MODEL_FILE)
         self.model_regressor = self._load_model(REGRESSOR_MODEL_FILE)
@@ -181,6 +185,7 @@ class AQIPredictor:
         expects_sin_cos = any(col.endswith('_sin') for col in self.feature_names) if self.feature_names else False
 
         if expects_sin_cos:
+            #Create cyclical time features like in your notebook.
             df_engineered['hour'] = df_engineered.index.hour
             df_engineered['day_of_week'] = df_engineered.index.dayofweek
             df_engineered['month'] = df_engineered.index.month
@@ -224,27 +229,34 @@ class AQIPredictor:
 
     def predict_24h_forecast(self, city):
         """Fetches forecast, engineers features, runs iterative prediction."""
-
+        
+        #Check if the app is ready to predict.
         if not self.is_initialized:
             error_msg = "Predictor not fully initialized (missing components)."
             logging.error(error_msg); return None, error_msg
-
+            
+        #Get the seed data last 48 hours of PM2.5.
         pm25_lags_hist = self.get_historical_lags(city)
         if pm25_lags_hist is None and MAX_LAG > 0: return None, "Failed to retrieve historical lags."
         pm25_lags_hist = pm25_lags_hist if pm25_lags_hist is not None else []
         coords = CITIES_COORDS.get(city)
         if not coords: return None, "Invalid city name."
+        
+        #Call the Open-Meteo API to get the next 2 days of weather.
         forecast_params = {
             "latitude": coords["lat"], "longitude": coords["lon"],
             "hourly": ["temperature_2m", "relativehumidity_2m", "precipitation", "windspeed_10m"],
             "timezone": TIMEZONE, "forecast_days": 2
         }
+        
+        #Create the feature engineered DataFrame from the weather data.
         try:
             response_fc = requests.get(FORECAST_API_URL, params=forecast_params, timeout=15)
             response_fc.raise_for_status(); data_fc = response_fc.json()
             df_fc_raw = pd.DataFrame(data_fc['hourly']); df_fc_raw['time'] = pd.to_datetime(df_fc_raw['time'])
             df_fc_raw.set_index('time', inplace=True)
             if df_fc_raw.index.tz is not None: df_fc_raw.index = df_fc_raw.index.tz_localize(None)
+            #Filter the raw forecast to get only the next 24 hours.
             last_hist_time = self.historical_data[self.historical_data['city'] == city].index.max()
             df_fc = df_fc_raw[df_fc_raw.index > last_hist_time].head(24)
             if df_fc.empty: return None, "No future forecast data found."
